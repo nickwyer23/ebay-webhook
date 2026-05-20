@@ -7,20 +7,26 @@ const VERIFICATION_TOKEN = process.env.VERIFICATION_TOKEN;
 const ENDPOINT_URL = process.env.ENDPOINT_URL;
 
 app.get('/ebay-deletion', (req, res) => {
-  const challengeCode = req.query.challenge_code;
-    if (!challengeCode) return res.status(400).send('Missing challenge code');
+    const challengeCode = req.query.challenge_code;
+    console.log('=== eBay Challenge Request ===');
+    console.log('challengeCode:', challengeCode);
+    console.log('VERIFICATION_TOKEN:', VERIFICATION_TOKEN);
+    console.log('ENDPOINT_URL:', ENDPOINT_URL);
 
-      const hash = crypto.createHash('sha256')
-          .update(challengeCode + VERIFICATION_TOKEN + ENDPOINT_URL)
-              .digest('hex');
+          if (!challengeCode) return res.status(400).send('Missing challenge code');
 
-                res.json({ challengeResponse: hash });
-                });
+          const hash = crypto.createHash('sha256')
+      .update(challengeCode + VERIFICATION_TOKEN + ENDPOINT_URL)
+      .digest('hex');
 
-                app.post('/ebay-deletion', (req, res) => {
-                  console.log('eBay deletion notification received:', req.body);
-                    res.status(200).send('OK');
-                    });
+          console.log('Computed hash:', hash);
+    res.json({ challengeResponse: hash });
+});
 
-                    const PORT = process.env.PORT || 3000;
-                    app.listen(PORT, () => console.log('Server running on port ' + PORT));
+app.post('/ebay-deletion', (req, res) => {
+    console.log('eBay deletion notification received:', req.body);
+    res.status(200).send('OK');
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Server running on port ' + PORT));
